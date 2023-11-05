@@ -19,7 +19,7 @@ export const createQuotation = async (chatId, data) => {
 export const updateQuotation = async (quotationId, chatId, data) => {
   const { title, company, description, price } = data;
   const response = await instance.put(
-    `/quotations/${quotationId}?chatId=${chatId}`,
+    `/api/quotations/${quotationId}?chatId=${chatId}`,
     {
       title,
       company,
