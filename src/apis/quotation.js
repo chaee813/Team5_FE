@@ -19,7 +19,7 @@ export const createQuotation = async (chatId, data) => {
 export const updateQuotation = async (quotationId, chatId, data) => {
   const { title, company, description, price } = data;
   const response = await instance.put(
-    `/api/quotations/${quotationId}?chatId=${chatId}`,
+    `/quotations/${quotationId}?chatId=${chatId}`,
     {
       title,
       company,
@@ -43,6 +43,6 @@ export const confirmQuotationDetail = async (quotationId, chatId) => {
 };
 
 export const getQuotationCollectList = async (page) => {
-  const response = await instance.get(`/api/quotations/collect?page=${page}`);
+  const response = await instance.get(`/quotations/collect?page=${page}`);
   return response.data.response;
 };
