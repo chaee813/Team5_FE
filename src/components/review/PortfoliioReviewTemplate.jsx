@@ -42,16 +42,11 @@ export default function PortfoliioReviewTemplate() {
   if (isLoading) return <Spinner />;
   return (
     <>
-      <div className="w-full h-full p-5 flex flex-col gap-3 px-8">
+      <div className="w-full h-full flex flex-col gap-2">
         {portfolioReviews.map((review) => (
           <PortfolioReviewItem review={review} key={review.id} />
         ))}
-        {isFetchingNextPage && (
-          <>
-            <PortfolioReviewSkeleton />
-            <PortfolioReviewSkeleton />
-          </>
-        )}
+        {isFetchingNextPage && <PortfolioReviewSkeleton />}
       </div>
       <div ref={bottomObserver} />
     </>

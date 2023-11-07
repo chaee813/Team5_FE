@@ -1,16 +1,16 @@
 import React, { useState } from "react";
 import { useMutation, useQueryClient } from "react-query";
-import { confirmQuotationDetail } from "../../apis/quotation";
+import { useParams } from "react-router-dom";
+import { deleteQuotation } from "../../apis/quotation";
 import Button from "../common/atoms/Button";
 import BottomSheet from "../common/bottomsheet/BottomSheet";
 
-const ConfirmOneBottomSheet = ({ onClose, quotationId, chatId }) => {
+const DeleteOneBottomSheet = ({ onClose, quotationId }) => {
   const [agreePolicy, setAgreePolicy] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { mutate: confirmQuotationDetailMutate } = useMutation(
-    confirmQuotationDetail,
-  );
+  const { mutate: deleteQuotationMutate } = useMutation(deleteQuotation);
   const queryClient = useQueryClient();
+  const { chatId } = useParams();
 
   const handleAgreement = () => {
     setAgreePolicy(!agreePolicy);
@@ -19,28 +19,25 @@ const ConfirmOneBottomSheet = ({ onClose, quotationId, chatId }) => {
   const handleConfirmOne = async () => {
     if (!agreePolicy) return;
     setIsSubmitting(true);
-    confirmQuotationDetailMutate(
-      { quotationId, chatId },
-      {
-        onSuccess: () => {
-          queryClient.invalidateQueries(`/quotations?chatId=${chatId}`);
-          setIsSubmitting(false);
-          onClose();
-        },
-        onError: (error) => {
-          console.log(error);
-          setIsSubmitting(false);
-        },
+    deleteQuotationMutate(quotationId, {
+      onSuccess: () => {
+        queryClient.invalidateQueries(`/quotations?chatId=${chatId}`);
+        setIsSubmitting(false);
+        onClose();
       },
-    );
+      onError: (error) => {
+        console.log(error);
+        setIsSubmitting(false);
+      },
+    });
   };
 
   return (
     <BottomSheet onClose={onClose}>
       <div className="flex flex-col">
         <div className="flex flex-col tracking-tight font-bold text-lg pb-[42px]">
-          <span>해당 항목의 결제가 완료되었나요?</span>
-          <span>변경 후에는 취소가 불가능합니다.</span>
+          <span>정말 삭제하시겠습니까?</span>
+          <span>삭제 후에는 취소가 불가능합니다.</span>
         </div>
         <div className="pb-[15px]">
           <label htmlFor="policy" className="flex gap-1 items-center px-1">
@@ -64,11 +61,11 @@ const ConfirmOneBottomSheet = ({ onClose, quotationId, chatId }) => {
           onClick={handleConfirmOne}
           disabled={isSubmitting}
         >
-          변경하기
+          삭제하기
         </Button>
       </div>
     </BottomSheet>
   );
 };
 
-export default ConfirmOneBottomSheet;
+export default DeleteOneBottomSheet;

@@ -121,19 +121,17 @@ const PortfolioDetailTemplate = ({ portfolio }) => {
       </div>
       {/* 찜하기 & 리뷰 */}
       <div className=" flex w-full border-t items-center">
-        <div className="h-[50px] w-2/5 border-r flex justify-center">
+        <div className="h-[50px] w-1/2 border-r flex justify-center">
           <FavoriteButton isLiked={portfolio.isLiked} />
         </div>
-        <div className="h-[50px] w-3/5 flex items-center justify-center">
+        <div className="h-[50px] w-1/2 flex items-center justify-center">
           <Link to={`/portfolios/reviews/${portfolio.userId}`}>
-            <div className="flex gap-3 items-center">
-              <span className="font-bold">
-                리뷰({portfolio.reviews.totalReviewCount})
-              </span>
+            <div className="flex gap-[10px] items-center">
+              <span className="font-bold">리뷰</span>
               <div className="flex gap-1 items-center">
-                <StarIcon className="w-[20px] h-[20px] object-cover" />
-                <div className=" text-[18px] align-middle font-bold pt-[2px]">
-                  {portfolio.reviews.totalStars}
+                <StarIcon className="w-[16px] h-[16px] object-cover mb-[1px]" />
+                <div className="text-base align-middle font-bold">
+                  {portfolio.avgStars}
                 </div>
               </div>
             </div>
