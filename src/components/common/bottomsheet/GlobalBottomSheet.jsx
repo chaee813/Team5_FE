@@ -6,24 +6,16 @@ import ServerErrorBottomSheet from "./ServerErrorBottomSheet";
 import NavigateReviewBottomSheet from "./NavigateReviewBottomSheet";
 import DeleteReviewBottomSheet from "../../review/DeleteReviewBottomSheet";
 import MessageBottomSheet from "./MessageBottomSheet";
+import ForbiddenBottomSheet from "./ForbiddenBottomSheet";
 
 export default function GlobalBottomSheet() {
   const { bottomSheetType, isOpen, message } = useSelector(
     (state) => state.bottomSheet,
   );
   const dispatch = useDispatch();
-
-  const BOTTOMSHEET_TYPES = {
-    LOGIN: "loginBottomSheet",
-    SERVER_ERROR: "serverErrorBottomSheet",
-    NAVIGATE_REVIEW: "navigateReviewBottomSheet",
-    DELETE_REVIEW: "deleteReviewBottomSheet",
-    MESSAGE: "messageBottomSheet",
-  };
-
   const BOTTOMSHEET_COMPONENTS = [
     {
-      type: BOTTOMSHEET_TYPES.LOGIN,
+      type: "loginBottomSheet",
       component: (
         <RequiredLoginBottomSheet
           onClose={() => dispatch(closeBottomSheet())}
@@ -31,13 +23,13 @@ export default function GlobalBottomSheet() {
       ),
     },
     {
-      type: BOTTOMSHEET_TYPES.SERVER_ERROR,
+      type: "serverErrorBottomSheet",
       component: (
         <ServerErrorBottomSheet onClose={() => dispatch(closeBottomSheet())} />
       ),
     },
     {
-      type: BOTTOMSHEET_TYPES.NAVIGATE_REVIEW,
+      type: "navigateReviewBottomSheet",
       component: (
         <NavigateReviewBottomSheet
           onClose={() => dispatch(closeBottomSheet())}
@@ -45,18 +37,24 @@ export default function GlobalBottomSheet() {
       ),
     },
     {
-      type: BOTTOMSHEET_TYPES.DELETE_REVIEW,
+      type: "deleteReviewBottomSheet",
       component: (
         <DeleteReviewBottomSheet onClose={() => dispatch(closeBottomSheet())} />
       ),
     },
     {
-      type: BOTTOMSHEET_TYPES.MESSAGE,
+      type: "messageBottomSheet",
       component: (
         <MessageBottomSheet
           message={message}
           onClose={() => dispatch(closeBottomSheet())}
         />
+      ),
+    },
+    {
+      type: "forbiddenBottomSheet",
+      component: (
+        <ForbiddenBottomSheet onClose={() => dispatch(closeBottomSheet())} />
       ),
     },
   ];

@@ -1,12 +1,11 @@
 import { CircularProgress } from "@mui/material";
 import React, { useRef, useState } from "react";
 import { useMutation, useQueryClient } from "react-query";
-import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 import { updatePortfolio } from "../../apis/portfolio";
+import useOpenBottomSheet from "../../hooks/useOpenBottomSheet";
 import { comma, uncomma } from "../../utils/convert";
-import { openMessageBottomSheet } from "../../utils/handleBottomSheet";
 import ImageUploadZone from "../common/ImageUploadZone";
-import InputGroup from "../common/accounts/InputGroup";
 import AutoHeightTextarea from "../common/atoms/AutoHeightTextarea";
 import Button from "../common/atoms/Button";
 import Spinner from "../common/atoms/Spinner";
@@ -14,8 +13,8 @@ import ItemsInfo from "./ItemsInfo";
 import SelectRegion from "./SelectRegion";
 
 // done test
-export default function UpdatePortfoliotemplate({ portfolio }) {
-  const dispatch = useDispatch();
+export default function UpdatePortfolioTemplate({ portfolio }) {
+  const { openBottomSheetHandler } = useOpenBottomSheet();
   const [location, setLocation] = useState(portfolio?.location);
   const [items, setItems] = useState([
     ...portfolio.items.map((item) => {
@@ -29,10 +28,10 @@ export default function UpdatePortfoliotemplate({ portfolio }) {
   const [isSubmitting, setIsSubmitting] = useState(false); // login api 호출 중인지 아닌지 확인
   const [isUploading, setIsUploading] = useState(false);
 
+  const { userInfo } = useSelector((state) => state.user);
   const { mutate: updateMutate } = useMutation(updatePortfolio);
   const queryClient = useQueryClient();
 
-  const nameRef = useRef(null);
   const locationRef = useRef(null);
   const itemRef = useRef(null);
   const titleRef = useRef(null);
@@ -41,16 +40,11 @@ export default function UpdatePortfoliotemplate({ portfolio }) {
   const partnerCompanyRef = useRef(null);
 
   const openMessageBottomSheetAndFocus = (message, ref) => {
-    openMessageBottomSheet(dispatch, message);
+    openBottomSheetHandler({ bottomSheet: "messageBottomSheet", message });
     ref.current?.focus();
   };
 
   const handleSubmit = async () => {
-    console.log("items", items);
-    if (!nameRef.current?.value) {
-      openMessageBottomSheetAndFocus("이름을 입력해주세요.", nameRef);
-      return;
-    }
     if (!location) {
       openMessageBottomSheetAndFocus("지역을 선택해주세요.", locationRef);
       return;
@@ -83,11 +77,14 @@ export default function UpdatePortfoliotemplate({ portfolio }) {
       return;
     }
     if (images.length === 0) {
-      openMessageBottomSheet(dispatch, "포트폴리오 사진을 추가해주세요.");
+      openBottomSheetHandler({
+        bottomSheet: "messageBottomSheet",
+        message: "포트폴리오 사진을 추가해주세요.",
+      });
       return;
     }
     const portfolioData = {
-      plannerName: nameRef.current.value,
+      plannerName: userInfo.username,
       items: items.map((item) => {
         return {
           itemTitle: item.itemTitle,
@@ -107,19 +104,19 @@ export default function UpdatePortfoliotemplate({ portfolio }) {
       onSuccess: () => {
         queryClient.invalidateQueries("portfolios/self");
         setIsSubmitting(false);
-        openMessageBottomSheet(
-          dispatch,
-          "포트폴리오가 성공적으로 수정되었습니다.",
-        );
+        openBottomSheetHandler({
+          bottomSheet: "messageBottomSheet",
+          message: "포트폴리오가 성공적으로 수정되었습니다.",
+        });
       },
       onError: (error) => {
         // 디폴트 에러 핸들러를 적용하면 작성한게 사라지므로 따로 처리
         console.log(error);
         setIsSubmitting(false);
-        openMessageBottomSheet(
-          dispatch,
-          "포트폴리오를 수정하는데 실패했습니다.",
-        );
+        openBottomSheetHandler({
+          bottomSheet: "messageBottomSheet",
+          message: "포트폴리오를 수정하는데 실패했습니다.",
+        });
       },
     });
   };
@@ -129,15 +126,15 @@ export default function UpdatePortfoliotemplate({ portfolio }) {
       {isUploading && <Spinner />}
       <div className="w-full h-full flex flex-col p-7 gap-5">
         {/* 이름 */}
-        <InputGroup
-          id="plannerName"
-          name="plannerName"
-          type="text"
-          placeholder="이름을 입력해주세요."
-          label="이름"
-          ref={nameRef}
-          defaultValue={portfolio?.plannerName}
-        />
+        <div>
+          <div className=" pb-[5px] text-xs">이름</div>
+          <input
+            type="text"
+            disabled
+            defaultValue={userInfo.username}
+            className="relative w-full h-[50px] rounded-[10px] px-[20px] py-[15px] border border-lightgray-sunsu text-sm"
+          />
+        </div>
         {/* 지역 */}
         <SelectRegion
           location={location}

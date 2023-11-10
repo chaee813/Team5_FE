@@ -1,29 +1,29 @@
 import { useRef, useState } from "react";
 import { useMutation, useQueryClient } from "react-query";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { useLocation } from "react-router-dom";
 import { addFavorite, deleteFavorite } from "../../apis/favorite";
 import { ReactComponent as HeartOutlinedIcon } from "../../assets/heart-03.svg";
 import { ReactComponent as HeartIcon } from "../../assets/heart-04.svg";
 import { ReactComponent as StarIcon } from "../../assets/star-02.svg";
+import useDefaultErrorHandler from "../../hooks/useDefaultErrorHandler";
 import { comma } from "../../utils/convert";
-import { openSeverErrorBottomSheet } from "../../utils/handleBottomSheet";
 import Button from "../common/atoms/Button";
 import Card from "../common/atoms/Card";
 import SquarePhoto from "../common/atoms/SquarePhoto";
 
 // done test
-const PortfolioCard = ({ portfolio }) => {
+const PortfolioCard = ({ portfolio, setFavorites }) => {
   const location = useLocation();
-  const dispatch = useDispatch();
   const { isLogged } = useSelector((state) => state.user);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const casheKeyRef = useRef(
+  const cacheKey = useRef(
     location.pathname === "/favorites" ? "favorites" : "portfolios",
   );
   const { mutate: addFavoriteMutate } = useMutation(addFavorite);
   const { mutate: deleteFavoriteMutate } = useMutation(deleteFavorite);
   const queryClient = useQueryClient();
+  const { defaultErrorHandler } = useDefaultErrorHandler();
 
   const handleAddFavorite = () => {
     setIsSubmitting(true);
@@ -31,14 +31,12 @@ const PortfolioCard = ({ portfolio }) => {
       { portfolioId: parseInt(portfolio.id, 10) },
       {
         onSuccess: () => {
-          queryClient.invalidateQueries(casheKeyRef.current);
+          queryClient.invalidateQueries(cacheKey.current);
           setIsSubmitting(false);
         },
         onError: (error) => {
           console.log(error);
-          if (error.response.status === 500) {
-            openSeverErrorBottomSheet(dispatch);
-          }
+          defaultErrorHandler(error);
           setIsSubmitting(false);
         },
       },
@@ -50,15 +48,21 @@ const PortfolioCard = ({ portfolio }) => {
     deleteFavoriteMutate(
       { portfolioId: parseInt(portfolio.id, 10) },
       {
-        onSuccess: () => {
-          queryClient.invalidateQueries(casheKeyRef.current);
+        onSuccess: async () => {
+          if (location.pathname === "/search") {
+            queryClient.refetchQueries(cacheKey.current);
+          } else {
+            const data = queryClient.getQueriesData(cacheKey.current);
+            console.log("data", data[0][1]?.pages?.flat());
+            setFavorites((prev) =>
+              prev.filter((item) => item.id !== portfolio.id),
+            );
+          }
           setIsSubmitting(false);
         },
         onError: (error) => {
           console.log(error);
-          if (error.response.status === 500) {
-            openSeverErrorBottomSheet(dispatch);
-          }
+          defaultErrorHandler(error);
           setIsSubmitting(false);
         },
       },
